@@ -1,0 +1,2 @@
+
+<strong>Copyright &copy; 2016 - <?php echo date('Y'); ?> <a target='_BLANK' href="https://members.phpmu.com"> Universitas SuryoAtmojo</a>.</strong> Develop by : <a style='color:#000' href='https://www.facebook.com/robbyprihandaya'>Suryo Atmojo</a>

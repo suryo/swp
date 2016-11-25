@@ -1,0 +1,821 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+class Test extends CI_Controller {
+	function index(){
+		//cek_session_admin();
+		
+		//$data['record'] = $this->model_menu->menu_website();
+		//$data['record'] = $this->model_menu->menu_website();
+		$this->tabelCRUD();
+		//$this->template->load('administrator/template','menu/mod_menu/view_menu',$data);
+	}
+	
+ public function tabelCRUD()
+	{
+		cek_session_admin();
+		
+		$data['record'] = $this->model_menu->menu_website();
+		try{
+			$crud = new grocery_CRUD();
+
+			$crud->set_theme('bootstrap');
+			//$crud = new grocery_CRUD();
+
+		//Jangan lupa load library ini
+		$this->load->library('gc_dependent_select');
+		$crud->set_crud_url_path(site_url('test/index'));
+
+		$crud->set_table('data_diri');
+		$crud->columns('nama','fk_id_prov','fk_id_kota','fk_id_kec','fk_id_kel');//$crud->columns('nama','fk_id_prov','nama_prov','fk_id_kota','fk_id_kec','fk_id_kel');
+		$crud->display_as('fk_id_prov','Provinsi')
+			 ->display_as('fk_id_kota','Kota')
+			 ->display_as('fk_id_kec','Kecamatan')
+			 ->display_as('fk_id_kel','Kelurahan');
+		$crud->set_subject('Data Diri');
+		$crud->set_relation('fk_id_prov','provinsi','nama');//$crud->set_relation('fk_id_prov','provinsi','id_prov');
+		$crud->set_relation('fk_id_kota','kabupaten','nama');
+		$crud->set_relation('fk_id_kec','kecamatan','nama');
+		$crud->set_relation('fk_id_kel','kelurahan','nama');
+
+		$fields = array(
+
+		// Field Provinsi
+		'fk_id_prov' => array( // first dropdown name
+		'table_name' => 'provinsi', // table of country
+		'title' => 'nama', // country title
+		'relate' => null, // the first dropdown hasn't a relation
+		'data-placeholder' => 'Pilih Provinsi' //dropdown's data-placeholder:
+		),
+		// Field Kabupaten
+		'fk_id_kota' => array( // second dropdown name'nama_prov' => array( // second dropdown name
+		'table_name' => 'kabupaten', // table of state'table_name' => 'provinsi', // table of state
+		'title' => 'nama', // state title
+		'id_field' => 'id_kab', // table of state: primary key'id_field' => 'id_prov', // table of state: primary key
+		'relate' => 'id_prov', // table of state:
+		'data-placeholder' => 'nama prov' //dropdown's data-placeholder:
+
+		),
+		// Field Kecamatan
+		'fk_id_kec' => array(
+		'table_name' => 'kecamatan',
+		'title' => 'ID: {id_kec} / Kota : {nama}',  // now you can use this format )))
+		//'where' =>"post_code>'167'",  // string. It's an optional parameter.
+		//'order_by'=>"id_kab DESC",  // string. It's an optional parameter.
+		'id_field' => 'id_kec',
+		'relate' => 'id_kab',
+		'data-placeholder' => 'Pilih Kecamatan'
+		),
+		// Field Kabupaten
+		'fk_id_kel' => array( // second dropdown name
+		'table_name' => 'kelurahan', // table of state
+		'title' => 'nama', // state title
+		'id_field' => 'id_kel', // table of state: primary key
+		'relate' => 'id_kec', // table of state:
+		'data-placeholder' => 'Pilih Kelurahan' //dropdown's data-placeholder:
+		/**
+		// Field Kabupaten
+		'fk_id_kota' => array( // second dropdown name
+		'table_name' => 'kabupaten', // table of state
+		'title' => 'nama', // state title
+		'id_field' => 'id_kab', // table of state: primary key
+		'relate' => 'id_prov', // table of state:
+		'data-placeholder' => 'Pilih Kota' //dropdown's data-placeholder:
+
+		),
+		// Field Kecamatan
+		'fk_id_kec' => array(
+		'table_name' => 'kecamatan',
+		'title' => 'ID: {id_kec} / Kota : {nama}',  // now you can use this format )))
+		//'where' =>"post_code>'167'",  // string. It's an optional parameter.
+		//'order_by'=>"id_kab DESC",  // string. It's an optional parameter.
+		'id_field' => 'id_kec',
+		'relate' => 'id_kab',
+		'data-placeholder' => 'Pilih Kecamatan'
+		),
+		// Field Kabupaten
+		'fk_id_kel' => array( // second dropdown name
+		'table_name' => 'kelurahan', // table of state
+		'title' => 'nama', // state title
+		'id_field' => 'id_kel', // table of state: primary key
+		'relate' => 'id_kec', // table of state:
+		'data-placeholder' => 'Pilih Kelurahan' //dropdown's data-placeholder:
+**/
+		)
+		);
+
+		$config = array(
+		'main_table' => 'data_diri',
+		'main_table_primary' => 'id',
+		"url" => site_url() . '/test/index/',
+		'ajax_loader' => base_url() . 'assets/ajax-loader.gif'
+		);
+		$categories = new gc_dependent_select($crud, $fields, $config);
+
+		// first method:
+		//$output = $categories->render();
+
+		// the second method:
+		$js = $categories->get_js();
+		//$output = $crud->render();
+		
+
+		//$this->_example_output($output);
+			
+			//$data['level'] = $this->session->userdata('level_id');
+			//$data['email'] = $this->session->userdata('email');
+			//$data['kurikulum'] = core::getAll("kurikulum","");
+			$output = $crud->render();
+			$output->output.= $js;
+			$output = array_merge( (array)$output, $data);
+			//$datax['include'] =   $this->load->view('/read/include','',TRUE);
+			//$datax['content'] =   $this->load->view('/read/content',$output,TRUE);
+			//$output = array_merge( (array)$output, $datax);
+
+			$this->_example_output($output);
+			 //$this->load->view("admin/main",$output);
+
+		}catch(Exception $e){
+			show_error($e->getMessage().' --- '.$e->getTraceAsString());
+		}
+	}
+	
+	public function _example_output($output = null)
+	{
+		//$this->load->view('test/mod_menu/view_menu',$output);
+		$this->template->load('administrator/template','test/mod_menu/view_menu',$output);
+	
+	}
+
+	function home(){
+		cek_session_admin();
+		$this->template->load('administrator/template','administrator/view_home');
+	}
+
+	function identitaswebsite(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_main->identitas_update();
+			redirect('administrator/identitaswebsite');
+		}else{
+			$data['record'] = $this->model_main->identitas()->row_array();
+			$this->template->load('administrator/template','administrator/mod_identitas/view_identitas',$data);
+		}
+	}
+
+	// Controller Modul Menu Website
+
+	function menuwebsite(){
+		cek_session_admin();
+		$data['record'] = $this->model_menu->menu_website();
+		$this->template->load('administrator/template','administrator/mod_menu/view_menu',$data);
+	}
+
+	function tambah_menuwebsite(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_menu->menu_website_tambah();
+			redirect('administrator/menuwebsite');
+		}else{
+			$data['record'] = $this->model_menu->menu_utama();
+			$this->template->load('administrator/template','administrator/mod_menu/view_menu_tambah',$data);
+		}
+	}
+
+	function edit_menuwebsite(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_menu->menu_website_update();
+			redirect('administrator/menuwebsite');
+		}else{
+			$data['record'] = $this->model_menu->menu_utama();
+			$data['rows'] = $this->model_menu->menu_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_menu/view_menu_edit',$data);
+		}
+	}
+
+	function delete_menuwebsite(){
+		$id = $this->uri->segment(3);
+		$this->model_menu->menu_delete($id);
+		redirect('administrator/menuwebsite');
+	}
+
+
+	// Controller Modul Halaman Baru
+
+	function halamanbaru(){
+		cek_session_admin();
+		$data['record'] = $this->model_halaman->halamanstatis();
+		$this->template->load('administrator/template','administrator/mod_halaman/view_halaman',$data);
+	}
+
+	function tambah_halamanbaru(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_halaman->halamanstatis_tambah();
+			redirect('administrator/halamanbaru');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_halaman/view_halaman_tambah');
+		}
+	}
+
+	function edit_halamanbaru(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_halaman->halamanstatis_update();
+			redirect('administrator/halamanbaru');
+		}else{
+			$data['rows'] = $this->model_halaman->halamanstatis_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_halaman/view_halaman_edit',$data);
+		}
+	}
+
+	function delete_halamanbaru(){
+		$id = $this->uri->segment(3);
+		$this->model_halaman->halamanstatis_delete($id);
+		redirect('administrator/halamanbaru');
+	}
+
+	// Controller Modul List Berita
+
+	function listberita(){
+		cek_session_admin();
+		$data['record'] = $this->model_berita->list_berita();
+		$this->template->load('administrator/template','administrator/mod_berita/view_berita',$data);
+	}
+
+	function tambah_listberita(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_berita->list_berita_tambah();
+			redirect('administrator/listberita');
+		}else{
+			$data['tag'] = $this->model_berita->tag_berita();
+			$data['record'] = $this->model_berita->kategori_berita();
+			$this->template->load('administrator/template','administrator/mod_berita/view_berita_tambah',$data);
+		}
+	}
+
+	function cepat_listberita(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_berita->list_berita_cepat();
+			redirect('administrator/listberita');
+		}else{
+			redirect('administrator/listberita');
+		}
+	}
+
+	function edit_listberita(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_berita->list_berita_update();
+			redirect('administrator/listberita');
+		}else{
+			$data['tag'] = $this->model_berita->tag_berita();
+			$data['record'] = $this->model_berita->kategori_berita();
+			$data['rows'] = $this->model_berita->list_berita_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_berita/view_berita_edit',$data);
+		}
+	}
+
+	function delete_listberita(){
+		$id = $this->uri->segment(3);
+		$this->model_berita->list_berita_delete($id);
+		redirect('administrator/listberita');
+	}
+
+
+	// Controller Modul Kategori Berita
+
+	function kategoriberita(){
+		cek_session_admin();
+		$data['record'] = $this->model_berita->kategori_berita();
+		$this->template->load('administrator/template','administrator/mod_kategori/view_kategori',$data);
+	}
+
+	function tambah_kategoriberita(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_berita->kategori_berita_tambah();
+			redirect('administrator/kategoriberita');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_kategori/view_kategori_tambah');
+		}
+	}
+
+	function edit_kategoriberita(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_berita->kategori_berita_update();
+			redirect('administrator/kategoriberita');
+		}else{
+			$data['rows'] = $this->model_berita->kategori_berita_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_kategori/view_kategori_edit',$data);
+		}
+	}
+
+	function delete_kategoriberita(){
+		$id = $this->uri->segment(3);
+		$this->model_berita->kategori_berita_delete($id);
+		redirect('administrator/kategoriberita');
+	}
+
+
+
+		// Controller Modul Menu Group
+
+	function menugroup(){
+		cek_session_admin();
+		$data['record'] = $this->model_menu->menugroup();
+		$this->template->load('administrator/template','administrator/mod_menugroup/view_menugroup',$data);
+	}
+
+	function edit_menugroup(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_menu->menugroup_update();
+			redirect('administrator/menugroup');
+		}else{
+			$data['rows'] = $this->model_menu->menugroup_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_menugroup/view_menugroup_edit',$data);
+		}
+	}
+
+
+
+	// Controller Modul List Berita
+
+	function menugrouplist(){
+		cek_session_admin();
+		$data['record'] = $this->model_menu->menugrouplist();
+		$this->template->load('administrator/template','administrator/mod_menugroup_list/view_menugroup_list',$data);
+	}
+
+	function tambah_menugrouplist(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_menu->menugrouplist_tambah();
+			redirect('administrator/menugrouplist');
+		}else{
+			$data['record'] = $this->model_menu->menugroup();
+			$this->template->load('administrator/template','administrator/mod_menugroup_list/view_menugroup_list_tambah',$data);
+		}
+	}
+
+	function edit_menugrouplist(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_menu->menugrouplist_update();
+			redirect('administrator/menugrouplist');
+		}else{
+			$data['record'] = $this->model_menu->menugroup();
+			$data['rows'] = $this->model_menu->menugrouplist_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_menugroup_list/view_menugroup_list_edit',$data);
+		}
+	}
+
+	function delete_menugrouplist(){
+		$id = $this->uri->segment(3);
+		$this->model_menu->menugrouplist_delete($id);
+		redirect('administrator/menugrouplist');
+	}
+
+
+
+
+	// Controller Modul Tag Berita
+
+	function tagberita(){
+		cek_session_admin();
+		$data['record'] = $this->model_berita->tag_berita();
+		$this->template->load('administrator/template','administrator/mod_tag/view_tag',$data);
+	}
+
+	function tambah_tagberita(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_berita->tag_berita_tambah();
+			redirect('administrator/tagberita');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_tag/view_tag_tambah');
+		}
+	}
+
+	function edit_tagberita(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_berita->tag_berita_update();
+			redirect('administrator/tagberita');
+		}else{
+			$data['rows'] = $this->model_berita->tag_berita_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_tag/view_tag_edit',$data);
+		}
+	}
+
+	function delete_tagberita(){
+		$id = $this->uri->segment(3);
+		$this->model_berita->tag_berita_delete($id);
+		redirect('administrator/tagberita');
+	}
+
+
+
+	// Controller Modul Iklan Home
+
+	function iklanhome(){
+		cek_session_admin();
+		$data['record'] = $this->model_iklan->iklan_tengah();
+		$this->template->load('administrator/template','administrator/mod_iklanhome/view_iklanhome',$data);
+	}
+
+	function tambah_iklanhome(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_iklan->iklan_tengah_tambah();
+			redirect('administrator/iklanhome');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_iklanhome/view_iklanhome_tambah');
+		}
+	}
+
+	function edit_iklanhome(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_iklan->iklan_tengah_update();
+			redirect('administrator/iklanhome');
+		}else{
+			$data['rows'] = $this->model_iklan->iklan_tengah_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_iklanhome/view_iklanhome_edit',$data);
+		}
+	}
+
+	function delete_iklanhome(){
+		$id = $this->uri->segment(3);
+		$this->model_iklan->iklan_tengah_delete($id);
+		redirect('administrator/iklanhome');
+	}
+
+
+
+		// Controller Modul Download
+
+	function download(){
+		cek_session_admin();
+		$data['record'] = $this->model_download->download();
+		$this->template->load('administrator/template','administrator/mod_download/view_download',$data);
+	}
+
+	function tambah_download(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_download->download_tambah();
+			redirect('administrator/download');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_download/view_download_tambah');
+		}
+	}
+
+	function edit_download(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_download->download_update();
+			redirect('administrator/download');
+		}else{
+			$data['rows'] = $this->model_download->download_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_download/view_download_edit',$data);
+		}
+	}
+
+	function delete_download(){
+		$id = $this->uri->segment(3);
+		$this->model_download->download_delete($id);
+		redirect('administrator/download');
+	}
+
+
+
+
+	// Controller Modul Lowker
+
+	function lowker(){
+		cek_session_admin();
+		$data['record'] = $this->model_lowongan->lowker();
+		$this->template->load('administrator/template','administrator/mod_lowker/view_lowker',$data);
+	}
+
+	function tambah_lowker(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_lowongan->lowker_tambah();
+			redirect('administrator/lowker');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_lowker/view_lowker_tambah');
+		}
+	}
+
+	function edit_lowker(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_lowongan->lowker_update();
+			redirect('administrator/lowker');
+		}else{
+			$data['rows'] = $this->model_lowongan->lowker_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_lowker/view_lowker_edit',$data);
+		}
+	}
+
+	function delete_lowker(){
+		$id = $this->uri->segment(3);
+		$this->model_lowongan->lowker_delete($id);
+		redirect('administrator/lowker');
+	}
+
+
+
+	// Controller Modul Iklan Sidebar
+
+	function iklansidebar(){
+		cek_session_admin();
+		$data['record'] = $this->model_iklan->iklan_sidebar();
+		$this->template->load('administrator/template','administrator/mod_iklansidebar/view_iklansidebar',$data);
+	}
+
+	function tambah_iklansidebar(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_iklan->iklan_sidebar_tambah();
+			redirect('administrator/iklansidebar');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_iklansidebar/view_iklansidebar_tambah');
+		}
+	}
+
+	function edit_iklansidebar(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_iklan->iklan_sidebar_update();
+			redirect('administrator/iklansidebar');
+		}else{
+			$data['rows'] = $this->model_iklan->iklan_sidebar_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_iklansidebar/view_iklansidebar_edit',$data);
+		}
+	}
+
+	function delete_iklansidebar(){
+		$id = $this->uri->segment(3);
+		$this->model_iklan->iklan_sidebar_delete($id);
+		redirect('administrator/iklansidebar');
+	}
+
+
+
+	// Controller Modul Logo
+
+	function logowebsite(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_main->logo_update();
+			redirect('administrator/logowebsite');
+		}else{
+			$data['record'] = $this->model_main->logo();
+			$this->template->load('administrator/template','administrator/mod_logowebsite/view_logowebsite',$data);
+		}
+	}
+
+
+
+	// Controller Modul Template Website
+
+	function templatewebsite(){
+		cek_session_admin();
+		$data['record'] = $this->model_main->template();
+		$this->template->load('administrator/template','administrator/mod_template/view_template',$data);
+	}
+
+	function tambah_templatewebsite(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_main->template_tambah();
+			redirect('administrator/templatewebsite');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_template/view_template_tambah');
+		}
+	}
+
+	function edit_templatewebsite(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_main->template_update();
+			redirect('administrator/templatewebsite');
+		}else{
+			$data['rows'] = $this->model_main->template_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_template/view_template_edit',$data);
+		}
+	}
+
+	function delete_templatewebsite(){
+		$id = $this->uri->segment(3);
+		$this->model_main->template_delete($id);
+		redirect('administrator/templatewebsite');
+	}
+
+
+
+
+	// Controller Modul Agenda
+
+	function agenda(){
+		cek_session_admin();
+		$data['record'] = $this->model_agenda->agenda();
+		$this->template->load('administrator/template','administrator/mod_agenda/view_agenda',$data);
+	}
+
+	function tambah_agenda(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_agenda->agenda_tambah();
+			redirect('administrator/agenda');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_agenda/view_agenda_tambah');
+		}
+	}
+
+	function edit_agenda(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_agenda->agenda_update();
+			redirect('administrator/agenda');
+		}else{
+			$data['rows'] = $this->model_agenda->agenda_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_agenda/view_agenda_edit',$data);
+		}
+	}
+
+	function delete_agenda(){
+		$id = $this->uri->segment(3);
+		$this->model_agenda->agenda_delete($id);
+		redirect('administrator/agenda');
+	}
+
+
+
+
+	// Controller Modul YM
+
+	function ym(){
+		cek_session_admin();
+		$data['record'] = $this->model_main->ym();
+		$this->template->load('administrator/template','administrator/mod_ym/view_ym',$data);
+	}
+
+	function tambah_ym(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_main->ym_tambah();
+			redirect('administrator/ym');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_ym/view_ym_tambah');
+		}
+	}
+
+	function edit_ym(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_main->ym_update();
+			redirect('administrator/ym');
+		}else{
+			$data['rows'] = $this->model_main->ym_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_ym/view_ym_edit',$data);
+		}
+	}
+
+	function delete_ym(){
+		$id = $this->uri->segment(3);
+		$this->model_main->ym_delete($id);
+		redirect('administrator/ym');
+	}
+
+
+
+
+	// Controller Modul Pesan Masuk
+
+	function pesanmasuk(){
+		cek_session_admin();
+		$data['record'] = $this->model_main->pesan_masuk();
+		$this->template->load('administrator/template','administrator/mod_pesanmasuk/view_pesanmasuk',$data);
+	}
+
+	function detail_pesanmasuk(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		$this->db->query("UPDATE hubungi SET dibaca='Y' where id_hubungi='$id'");
+		if (isset($_POST['submit'])){
+			$this->model_main->pesan_masuk_kirim();
+			$data['rows'] = $this->model_main->pesan_masuk_view($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_pesanmasuk/view_pesanmasuk_detail',$data);
+		}else{
+			$data['rows'] = $this->model_main->pesan_masuk_view($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_pesanmasuk/view_pesanmasuk_detail',$data);
+		}
+	}
+
+
+
+
+	// Controller Modul User
+
+	function manajemenuser(){
+		cek_session_admin();
+		$data['record'] = $this->model_users->users();
+		$this->template->load('administrator/template','administrator/mod_users/view_users',$data);
+	}
+
+	function tambah_manajemenuser(){
+		cek_session_admin();
+		$id = $this->session->username;
+		if (isset($_POST['submit'])){
+			$this->model_users->users_tambah();
+			redirect('administrator/manajemenuser');
+		}else{
+			$data['rows'] = $this->model_users->users_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_users/view_users_tambah',$data);
+		}
+	}
+
+	function edit_manajemenuser(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_users->users_update();
+			redirect('administrator/manajemenuser');
+		}else{
+			$data['rows'] = $this->model_users->users_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_users/view_users_edit',$data);
+		}
+	}
+
+	function delete_manajemenuser(){
+		$id = $this->uri->segment(3);
+		$this->model_users->users_delete($id);
+		redirect('administrator/manajemenuser');
+	}
+
+	
+
+
+	// Controller Modul Modul
+
+	function manajemenmodul(){
+		cek_session_admin();
+		$data['record'] = $this->model_modul->modul();
+		$this->template->load('administrator/template','administrator/mod_modul/view_modul',$data);
+	}
+
+	function tambah_manajemenmodul(){
+		cek_session_admin();
+		if (isset($_POST['submit'])){
+			$this->model_modul->modul_tambah();
+			redirect('administrator/manajemenmodul');
+		}else{
+			$this->template->load('administrator/template','administrator/mod_modul/view_modul_tambah');
+		}
+	}
+
+	function edit_manajemenmodul(){
+		cek_session_admin();
+		$id = $this->uri->segment(3);
+		if (isset($_POST['submit'])){
+			$this->model_modul->modul_update();
+			redirect('administrator/manajemenmodul');
+		}else{
+			$data['rows'] = $this->model_modul->modul_edit($id)->row_array();
+			$this->template->load('administrator/template','administrator/mod_modul/view_modul_edit',$data);
+		}
+	}
+
+	function delete_manajemenmodul(){
+		$id = $this->uri->segment(3);
+		$this->model_modul->modul_delete($id);
+		redirect('administrator/manajemenmodul');
+	}
+
+	function logout(){
+		$this->session->sess_destroy();
+		redirect('main');
+	}
+}
